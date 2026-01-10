@@ -39,12 +39,26 @@ The objective is not to maximize point accuracy, but to:
 
 ---
 
+### Why design maps - From model equations to human-centered design tools
+
+While predictive models can be expressed as explicit mathematical equations, multivariate and standardized formulations quickly become impractical as decision interfaces for engineering use.
+
+In academic settings, this representation is usually sufficient. A linear regression with one variable can be easily interpreted as “the equation of a line”, and its behavior can be reasoned about analytically.
+
+Design maps translate the learned chemistry–UTS relationship into a human-readable representation that supports inverse reasoning: starting from a required UTS target and identifying chemistry regions that satisfy it under conservative uncertainty bounds.
+
+If a model is intended to support **design decisions**, not just prediction, it must be translated into a representation that is compatible with human reasoning, not algebraic manipulation.
+
+In this study, models are not presented as equations to be interpreted, but as constraints to be navigated visually.
+
+---
+
 ## Scope and Constraints
 
 ### In scope
 - Primary focus on **AA3105**, ensuring continuity with previous study cases
 - Chemistry-only feature set with frozen model structure
-- Explicit uncertainty quantification layered on top of the predictive model
+- Explicit uncertainty quantification layered on top of the predictive model (using a distribution-free, conformal-style approach)
 - 2D design maps as the primary decision interface
 - Limited use of 3D visualizations when they add clarity
 - Qualitative comparison between ridge and polynomial models at the map level
@@ -101,7 +115,7 @@ This study prioritizes **interpretability and usability** over raw metric perfor
 - Out-of-fold predictions used to ensure conservative assessment
 
 ### Uncertainty layer
-Uncertainty is introduced as a post-modeling layer using a distribution-free approach (e.g. conformal prediction), enabling:
+Uncertainty is introduced as a post-modeling layer using a distribution-free approach (e.g. conformal prediction), derived exclusively from out-of-fold residuals, enabling:
 - conservative lower bounds,
 - interpretable coverage guarantees,
 - and uncertainty estimation without altering the underlying model.
