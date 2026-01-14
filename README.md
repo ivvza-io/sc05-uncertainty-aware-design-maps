@@ -52,6 +52,59 @@ If a model is intended to support **design decisions**, not just prediction, it 
 In this study, models are not presented as equations to be interpreted, but as constraints to be navigated visually.
 
 ---
+### Conservative chemistry design map (AA3105)
+
+The figure below shows the conservative lower-bound prediction surface derived from a chemistry-only ridge model, calibrated using out-of-fold conformal residuals.
+
+![Conservative chemistry design map (AA3105)](assets/sc5_design_map.png)
+
+Rather than representing expected performance, the map encodes **guaranteed behavior**: each point reflects a lower bound on UTS that holds with the specified coverage level.
+
+This representation enables inverse reasoning, starting from a required UTS target and identifying chemistry regions that satisfy it under uncertainty, making it directly usable as a design and release support tool.
+
+
+### Robust region - target-based design guidance
+
+While the conservative design map provides a continuous view of guaranteed performance,
+engineering decisions are often binary in nature:
+
+> *Is this chemistry safe or not for a given requirement?*
+
+To support this decision, the conservative lower-bound surface is thresholded against a target UTS requirement.
+The resulting **robust region map** identifies chemistry combinations that satisfy the target **under uncertainty**, not just on average.
+
+In this representation:
+- **Robust regions** guarantee the required UTS with the specified coverage level.
+- **Non-robust regions** may meet the target on average, but cannot be relied upon under conservative assumptions.
+
+![Robust region](assets/sc5_robust_region.png)
+
+This binary view transforms the predictive model into a **release- and design-ready tool**,
+allowing engineers to define internal chemistry windows that balance performance and risk without physical trial campaigns.
+
+
+### Uncertainty layer - from prediction error to conservative bounds
+
+Uncertainty is introduced as a post-modeling layer, derived exclusively from **out-of-fold residuals**
+under group-aware cross-validation.
+
+![Conformal prediction band around point predictions (OOF)](assets/sc5_prediction_band.png)
+
+Rather than assuming a parametric error distribution or relying on in-sample confidence intervals,
+a **distribution-free, conformal-style approach** is used to quantify empirical prediction error.
+This ensures that uncertainty estimates reflect realistic, unseen-heats behavior.
+
+The resulting prediction bands define:
+- a **conservative lower bound**, used for design and release decisions,
+- an upper bound for completeness,
+- and an explicit trade-off between coverage and interval width.
+
+Importantly, this uncertainty layer does not modify the underlying predictive model.
+It acts as a transparent calibration step, translating empirical model error into
+**interpretable safety margins** suitable for engineering decision-making.
+
+
+---
 
 ## Scope and Constraints
 
