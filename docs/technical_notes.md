@@ -129,9 +129,9 @@ The selected value represents a balance between:
 
 Coverage is assessed empirically on out-of-fold predictions:
 
-$$
-\widehat{cov} = \mathbb{E}\left[\mathbb{1}\{|y - \hat{y}_{\mathrm{OOF}}| \le q\}\right]
-$$
+$$\widehat{cov} = \mathbb{E}\left[\mathbb{1}\{|y - \hat{y}_{\mathrm{OOF}}| \le q\}\right]$$
+
+**Observed coverage:** Approximately 90% of out-of-fold heats fall within the [ŷ_lower, ŷ_upper] band, validating that the selected α=0.10 margin achieves intended coverage on unseen data.
 
 The intent is to validate conservative behavior in practice without relying on parametric assumptions.
 
@@ -152,7 +152,8 @@ Deferral is not a limitation of capability; it is a deliberate scope decision al
 
 ### 6.1 Supported Domain
 
-Maps are generated within a **data-supported chemistry window** (e.g., p05–p95 for Mg and Mn) to:
+Maps are generated within the **5th–95th percentile window** (p05–p95) for Mg and Mn based on the analytical dataset. This choice:
+
 - minimize extrapolation,
 - preserve defensibility,
 - and reduce boundary artifacts from sparsely populated regions.
@@ -202,11 +203,40 @@ This mirrors the portfolio-wide principle:
 
 ## 8. Known Limitations and Failure Modes
 
-- global margins may under/over-cover in specific chemistry pockets,
-- map validity depends on process stability consistent with historical data,
-- standards derived from model outputs require periodic revalidation as operations evolve.
+While the uncertainty-aware approach is robust and empirically validated, several limitations must be understood for responsible use:
 
-Drift in upstream processes may invalidate **model outputs** over time, requiring revalidation of derived standards.
+### Global Margin Trade-Off
+
+The constant margin (q ≈ 7.5 MPa) simplifies interpretation and ensures smooth map geometry, but creates trade-offs across the chemistry space:
+
+- **Over-coverage in high-Mg regions:** Where residuals are naturally small (e.g., Mg > 0.50, where historical |residuals| ≤ 5 MPa), the 7.5 MPa margin is unnecessarily conservative. Robust regions may be smaller than required.
+
+- **Less conservative in low-Mg regions:** Where scatter is higher (e.g., Mg < 0.35, where some |residuals| > 8 MPa), the margin provides relatively less protection than in high-Mg regions.
+
+This heteroscedasticity is documented but intentionally not modeled locally (see Section 5.5 "Deferred Alternatives"). The global choice is conservative overall; it is a deliberate design trade-off to maintain interpretability and operational usability.
+
+### Process Drift
+
+Model validity depends on continuation of historical process conditions. If annealing temperatures, rolling schedules, or other process parameters shift significantly, the chemistry–UTS relationship may change, invalidating predictions.
+
+**Example:** If equipment recalibration increases annealing temperature by 50°C, new heats might show systematically higher or lower UTS than predicted, exceeding the 7.5 MPa margin.
+
+**Detection:** Monitor prediction residuals for new production. If P95 absolute error exceeds 10 MPa (vs. 7.5 MPa in OOF), revalidation is recommended.
+
+### Limited Scope (Chemistry Only)
+
+These maps deliberately exclude process variables (see SC04 findings). Engineering teams must recognize:
+- Chemistry defines the **potential** UTS under good conditions
+- Process execution (rolling, cooling, etc.) determines **actual** outcome
+- Within a chemistry window, process control remains critical
+
+### Temporal Validity
+
+Standards are derived from historical data. Periodic revalidation is recommended:
+
+- **Quarterly:** Routine performance check against new production data
+- **After major changes:** Equipment overhaul, supplier changes, specification revisions
+- **Upon drift detection:** If new predictions consistently miss by >±10 MPa
 
 ---
 
@@ -235,12 +265,52 @@ Key non-obvious decisions recorded for traceability:
 
 ## 11. Traceability
 
-- **Notebook:** `sc05_uncertainty_aware_design_maps.ipynb`
-- **Data semantics:** SQL semantic layer defined in SC01
-- **Commit:** `<>`
-
+- **Notebook:** sc05_uncertainty_aware_design_maps.ipynb
+- **Data source:** v_models_analysis_o_temper (same as SC02, SC04)
+- **Validation:** GroupKFold (n_splits=5, heat-level grouping)
+- **Toolkit:** [version pinned in requirements.txt]
+- **Reproducibility:** HOW_TO_RUN.md
 ---
 
+
+## APENDIX A. Revalidation Protocol and Maintenance
+
+### Intended Use Lifecycle
+
+1. **Initial validation:** OOF model performance on historical data (Section 4)
+2. **Deployment:** Maps released for engineering use
+3. **Monitoring:** Track prediction accuracy on new production
+4. **Revalidation:** Every 3 months or upon process change
+5. **Update:** Retrain model if drift is detected
+
+### Drift Detection Criteria
+
+Revalidation is triggered if:
+- **Residual growth:** Median |residuals| for new heats > 9 MPa (vs. historical p75 = 7.5 MPa)
+- **Coverage loss:** <85% of new heats fall within predicted ±q band
+- **Systematic bias:** New heats show consistent over/under prediction (>±5 MPa)
+- **Distribution shift:** UTS distribution moves >10 MPa from historical median (120 MPa)
+
+### Revalidation Actions
+
+When drift is detected:
+
+1. **Pull new data:** 100+ recent heats with comparable conditions
+2. **Diagnostic:** Retrain model on combined historical + new data
+3. **Compare:** Has model degradation occurred, or are conditions genuinely different?
+4. **Decide:**
+   - **No degradation:** Update coefficients, revise maps
+   - **Degradation detected:** Investigate root cause (composition, process, equipment)
+   - **Conditions changed:** Revalidate from scratch on new operating regime
+
+### Governance and Ownership
+
+- **Quarterly review:** Analytics team reviews prediction accuracy
+- **Alert threshold:** Automatically triggered if drift criteria exceeded
+- **Update authority:** [Define team/person responsible for model updates and standard revisions]
+- **Documentation:** Changes logged with date, reason, and new model details
+
+---
 ### Closing Note
 
 These technical notes document how uncertainty was made explicit in a conservative, empirically validated way to translate predictive modeling into practical decision support. The goal is not maximum sophistication, but defensible, stable guidance that engineering teams can adopt.

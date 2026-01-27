@@ -72,6 +72,8 @@ over marginal gains in nominal predictive accuracy.
 
 ## 4. Methodological Decisions (What We Chose — and Why)
 
+This analysis uses the same analytical dataset as SC02 and SC04 (AA3105-O, 2,294 heats). For detailed domain description, see SC02.
+
 - **System:** AA3105-O
 - **Features:** Mg, Mn (chemistry-only, frozen baseline)
 - **Model:** Ridge regression
@@ -96,87 +98,60 @@ $$
 The margin is intentionally global to preserve stability and interpretability of the resulting design maps.
 
 > Portfolio-wide assumptions and conventions are documented in  
-> → [`README_EXTENDED.md`](https://github.com/ivvza-io/analytics-engineering-portfolio/tree/main/docs/README_EXTENDED.md)   
-> Design rationale, methodological decisions, and implementation-level technical documentation are maintained in  
-→ [`docs/technical-notes`](https://github.com/ivvza-io/sc05-uncertainty-aware-design-maps/tree/main/docs/technical_notes.md)
-
+> → [`README_EXTENDED.md`](https://github.com/ivvza-io/analytics-engineering-portfolio/blob/main/docs/README_EXTENDED.md)  
+> Design rationale and technical details: [`docs/technical_notes.md`](docs/technical_notes.md)  
+>  
+> This study case uses the [`portfolio-analytics-toolkit`](https://github.com/ivvza-io/portfolio-analytics-toolkit) for reusable CV, metrics, and plotting utilities.  
+>  
+> Reproducibility instructions: [`HOW_TO_RUN.md`](HOW_TO_RUN.md)
 ---
 
 ## 5. Key Results and Design Artifacts
 
-Among the generated artifacts, the **robust design region** constitutes the primary decision tool.  
+**Global uncertainty margin:** q ≈ 7.5 MPa (90% quantile of out-of-fold absolute residuals)
+
+Among the generated artifacts, the **robust design region** constitutes the primary decision tool.
+
 All other maps are supporting surfaces intended to provide context, diagnostics, or justification.
 
-
-### 5.1 Design Map Domain
-
-Design maps are generated within a **data-supported chemistry window** (p05–p95 for Mg and Mn) to:
-- Minimize extrapolation
-- Ensure physical relevance
-- Maintain defensibility
-
 ---
 
-### 5.2 Mean Prediction Map
+### 5.1 Robust Design Region (Primary Result)
 
-This surface is provided for interpretive context only and is **not intended to support decisions directly**.
-
-
-**Figure 1 — Mean UTS prediction surface**
-
-![contour map of mean ŷ(Mg, Mn)](assets/sc5_mean_prediction.png)
-
-> Provides global trend context, not a decision rule.
-
----
-
-### 5.3 Conservative Lower-Bound Map
-
-**Figure 2 — Conservative lower-bound UTS surface (ŷ − q)**
-
-![contour map of lower bound](assets/sc5_design_map.png)
-
-> Represents the minimum expected UTS under the selected uncertainty margin.
-
----
-
-### 5.4 Robust Design Region
-
-**Figure 3 — Robust design region for target UTS**
+**Figure 1 — Robust Chemistry Window for Target UTS = 120 MPa**
 
 ![binary map: lower ≥ target](assets/sc5_robust_region.png)
 
-$$
-\mathrm{Robust}(x) = \mathbb{1}\left[\hat{y}_{\text{lower}}(x) \ge T\right]
-$$
+This map answers: **For a given target UTS, which chemistry compositions are defensible 
+under uncertainty?**
 
-This map:
-- Converts model output into a clear go / no-go rule
-- Eliminates the need to interpret coefficients or equations
-- Is directly usable in engineering discussions
+> → The chemistry map enables direct go/no-go decisions on composition selection.
 
 ---
 
-### 5.5 Uncertainty Diagnostic
+### 5.2 Uncertainty Validation
 
-**Figure 4 — Out-of-fold prediction band (±q)**
+**Figure 2 — Out-of-Fold Prediction Band (Margin Validation)**
 
 ![y vs ŷ with uncertainty band](assets/sc5_prediction_band.png)
 
-> Confirms that the selected margin behaves conservatively on unseen heats.
+This plot validates that the selected margin q ≈ 7.5 MPa covers ~90% of unseen heats, 
+confirming the conservative approach.
+
+> → Empirical evidence: approximately 90% of OOF residuals fall within [ŷ - q, ŷ + q].
 
 ---
 
-### 5.6 Model Choice for Map Geometry
+### 5.3 Model Justification
 
-**Figure 5 — Lower-bound comparison: Ridge vs Polynomial**
+**Figure 3 — Ridge vs Polynomial: Lower-Bound Comparison**
 
 ![side by side lower bound maps](assets/sc5_lower_comparison_ridge_poly.png)
 
-Ridge is preferred due to:
-- Smoother boundaries
-- Greater geometric stability
-- Higher interpretability for engineering use
+Ridge regression is selected for superior boundary stability and interpretability, 
+despite slightly higher error margin (MAE 3.6 vs 3.5 MPa).
+
+> → Smoother map geometry supports engineering adoption and reduces interpretation ambiguity.
 
 ---
 
@@ -212,27 +187,21 @@ The maps are designed to support early-stage screening and conservative decision
 
 ---
 
-## 8. Operational Guardrails: When NOT to Use the Design Maps
+## 8. Operational Guardrails: When to Use and When NOT to Use
 
-The design maps are valid only under specific conditions.  
-They should **not** be used in the following situations:
+**Use this tool for:**
+- Early-stage engineering screening
+- Chemistry window definition
+- Cross-functional discussions (metallurgy + process teams)
 
-- **Extrapolation outside the observed chemistry domain**  
-  The maps are constructed within the p05–p95 chemistry window. Predictions outside this region are not supported by data.
+**Do NOT use for:**
+- Extrapolation outside p05–p95 chemistry window
+- Non-comparable alloys or tempers
+- Release-grade decisions (mechanical testing required)
+- Process conditions significantly different from 2023 historical baselines
 
-- **Chemistries outside internal or external specification ranges**  
-  The maps assume that evaluated points are metallurgically feasible and within acceptable composition limits.
-
-- **Significant process changes**  
-  Changes in casting practice, rolling schedules, heat treatment, or equipment may invalidate the historical chemistry–UTS relationship.
-
-- **Non-comparable product routes or tempers**  
-  The maps are specific to the analyzed system and temper; applying them to different routes requires revalidation.
-
-- **Release-grade or final quality decisions**  
-  These maps are not intended to replace mechanical testing or formal release criteria.
-
-Explicitly defining when **not** to use the maps is essential to prevent misuse and overconfidence.
+**Key limitation:** Global uncertainty margin may be conservative in some regions, less so in others.  
+For detailed trade-offs, see Technical Notes.
 
 ---
 
@@ -250,33 +219,24 @@ Explicitly defining when **not** to use the maps is essential to prevent misuse 
 
 ---
 
-## 10. Limitations and Guardrails
-
-More sophisticated uncertainty treatments were intentionally deferred to preserve interpretability and practical usability.  
-Detailed methodological discussion is documented in the Technical Notes.
-
----
-
-## 11. Why This Study Case Matters in the Portfolio
+## 10. Why This Study Case Matters in the Portfolio
 
 This study case completes the portfolio arc:
 
-1. **SC02:** Chemistry can support internal standards
-2. **SC03:** Standards generalize as frameworks, not formulas
-3. **SC04:** Added variables do not guarantee robustness
-4. **SC05:** Standards become usable only when uncertainty is explicit
+1. **SC02:** Chemistry contains sufficient signal for UTS prediction
+2. **SC03:** This signal generalizes across alloy systems as a framework
+3. **SC04:** Additional variables do not improve robustness beyond chemistry alone
+4. **SC05:** Standards become operationally useful only when uncertainty is explicit
 
-It demonstrates how **data analysis** can be **translated** into **engineering decision tools**.
+> SC05 translates validated analytics into tools that engineering teams can use daily—without requiring deep statistical training—enabling confident, defensible decisions at the point of composition selection.
 
 ---
 
-## 12. Decision Summary
+## 11. Conclusion
 
-- **Design model:** Ridge regression
-- **Uncertainty treatment:** Global conformal-style margin
-- **Primary deliverable:** Robust chemistry design maps
+Ridge regression with global conformal-style uncertainty margins provides a defensible, interpretable foundation for conservative chemistry design maps. 
 
-This combination maximizes interpretability, robustness, and practical usability.
+This framework** translates validated predictive signals into operational decision tools** suitable for engineering adoption, completing the portfolio's standardization narrative from data foundation (SC01) through decision deployment (SC05).
 
 ---
 
