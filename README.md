@@ -228,7 +228,7 @@ This study case completes the portfolio arc:
 3. **SC04:** Additional variables do not improve robustness beyond chemistry alone
 4. **SC05:** Standards become operationally useful only when uncertainty is explicit
 
-> SC05 translates validated analytics into tools that engineering teams can use daily—without requiring deep statistical training—enabling confident, defensible decisions at the point of composition selection.
+**SC05 translates validated analytics into tools that engineering teams can use daily—without requiring deep statistical training—enabling confident, defensible decisions at the point of composition selection.**
 
 ---
 
