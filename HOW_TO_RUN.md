@@ -15,10 +15,10 @@ The following structure is expected in order to reproduce the analysis:
 .
 ├── data/
 │   └── public/
-│       └── sc02/
+│       └── sc05/
 │           └── v_models_analysis_o.csv
 ├── notebooks/
-│   └── sc02_chemistry_only_uts_model.ipynb
+│   └── sc05_uncertainty_aware_design_maps.ipynb
 ├── requirements.txt
 └── requirements-notebooks.txt
 ```
@@ -83,7 +83,7 @@ jupyter notebook
 ```
 
 Then open:
-- `notebooks/sc02_chemistry_only_uts_model.ipynb`
+- `notebooks/sc05_uncertainty_aware_design_maps.ipynb`
 
 ---
 
@@ -112,7 +112,7 @@ python -c "from portfolio_analytics_toolkit.cv import build_oof_predictions; pri
 Confirm the public dataset is present:
 
 ```bash
-ls -lh data/public/sc02/v_models_analysis_o.csv
+ls -lh data/public/sc05/v_models_analysis_o.csv
 ```
 
 If the file is missing, verify that you cloned the repository correctly and that the data/public/ directory is included in your checkout.

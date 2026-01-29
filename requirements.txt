@@ -1,0 +1,6 @@
+git+https://github.com/ivvza-io/portfolio-analytics-toolkit.git
+numpy
+pandas
+scikit-learn
+matplotlib
+pyarrow
