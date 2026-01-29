@@ -1,4 +1,4 @@
-git+https://github.com/ivvza-io/portfolio-analytics-toolkit.git
+portfolio-analytics-toolkit @ git+https://github.com/ivvza-io/portfolio-analytics-toolkit.git@v1.0.0
 numpy
 pandas
 scikit-learn
