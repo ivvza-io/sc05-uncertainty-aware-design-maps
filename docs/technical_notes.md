@@ -268,7 +268,7 @@ Key non-obvious decisions recorded for traceability:
 - **Notebook:** sc05_uncertainty_aware_design_maps.ipynb
 - **Data source:** v_models_analysis_o_temper (same as SC02, SC04)
 - **Validation:** GroupKFold (n_splits=5, heat-level grouping)
-- **Toolkit:** [version pinned in requirements.txt]
+- **Toolkit:** v1.0.0 (pinned in requirements.txt)
 - **Reproducibility:** HOW_TO_RUN.md
 ---
 
@@ -307,7 +307,7 @@ When drift is detected:
 
 - **Quarterly review:** Analytics team reviews prediction accuracy
 - **Alert threshold:** Automatically triggered if drift criteria exceeded
-- **Update authority:** [Define team/person responsible for model updates and standard revisions]
+- **Update authority:** Head of Quality Engineering (with Analytics team sign-off) responsible for standard revisions and design map updates
 - **Documentation:** Changes logged with date, reason, and new model details
 
 ---
